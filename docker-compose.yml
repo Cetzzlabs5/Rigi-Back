@@ -1,0 +1,53 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: rigi-postgres
+    environment:
+      POSTGRES_DB: rigi
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5433:5432"   # 👈 CAMBIO ACÁ
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - rigi-network
+
+
+  redis:
+    image: redis:7-alpine
+    container_name: rigi-redis
+    ports:
+      - "6380:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - rigi-network
+
+  app:
+    build:
+      context: .
+      args:
+        DATABASE_URL: postgresql://user:password@postgres:5432/rigi
+    container_name: rigi-app
+    environment:
+      DATABASE_URL: postgresql://user:password@postgres:5432/rigi
+      REDIS_URL: redis://redis:6379
+      PORT: 4000
+    ports:
+      - "4000:4000"
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - rigi-network
+    command: [ "sh", "-c", "sleep 10 && node dist/server.js" ]
+
+volumes:
+  postgres_data:
+  redis_data:
+
+
+networks:
+  rigi-network:
+    driver: bridge
