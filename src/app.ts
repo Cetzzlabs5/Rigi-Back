@@ -1,13 +1,15 @@
-import express from "express";
-import cors from "cors";
-import { prisma } from "./config/prisma.js";
+import express, { type Application } from 'express'
+import { prisma } from "./config/prisma";
+import { corsMiddleware } from "./config/cors";
 
-export const app = express();
+const app: Application = express()
 
-app.use(cors());
+app.use(corsMiddleware());
 app.use(express.json());
 
 app.get("/health", async (_req, res) => {
     const usersCount = await prisma.user.count();
     res.json({ ok: true, usersCount });
 });
+
+export default app;
