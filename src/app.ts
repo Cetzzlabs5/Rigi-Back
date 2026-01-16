@@ -1,6 +1,6 @@
 import express, { type Application } from 'express'
-import { prisma } from "./config/prisma";
-import { corsMiddleware } from "./config/cors";
+import { prisma } from "./config/prisma.js";
+import { corsMiddleware } from "./config/cors.js";
 
 const app: Application = express()
 
