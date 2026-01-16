@@ -1,6 +1,10 @@
 import cors from 'cors';
 
-process.loadEnvFile()
+try {
+    process.loadEnvFile()
+} catch (error) {
+    console.error('wtf')
+}
 
 const ACCEPTED_ORIGINS = [
     process.env.FRONTEND_URL || 'http://localhost:5173'
