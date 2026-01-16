@@ -1,7 +1,9 @@
 import cors from 'cors';
 
+process.loadEnvFile()
+
 const ACCEPTED_ORIGINS = [
-    process.env.FRONTEND_URL || 'http://localhost:5173'
+    process.env.FRONTEND_URL || 'http://localhost:1234'
 ]
 
 export const corsMiddleware = ({ acceptedOrigins = ACCEPTED_ORIGINS } = {}) => cors({
