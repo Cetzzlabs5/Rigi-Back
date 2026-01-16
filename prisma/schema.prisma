@@ -7,8 +7,136 @@ datasource db {
   provider = "postgresql"
 }
 
-model User {
-  id    Int     @id @default(autoincrement())
-  email String  @unique
-  name  String?
+enum ProviderGeneralStatus {
+  ACTIVE
+  SUSPENDED
+}
+
+enum LawScope {
+  PROVINCIAL
+  NATIONAL
+}
+
+enum RequirementType {
+  DOCUMENTARY
+  LOGICAL
+  TECHNICAL
+}
+
+enum ValidationResult {
+  APPROVED
+  REJECTED
+}
+
+enum ProviderLawStatus {
+  APPROVED
+  REJECTED
+  OBSERVED
+}
+
+enum ValidatorType {
+  SYSTEM
+  USER
+}
+
+model Provider {
+  id            String                @id @default(uuid())
+  legalName     String
+  cuit          String                @unique
+  mainActivity  String
+  contactEmail  String
+  phone         String
+  address       String
+  province      String
+  generalStatus ProviderGeneralStatus
+  createdAt     DateTime              @default(now())
+  updatedAt     DateTime              @updatedAt
+
+  documents   Document[]
+  lawStatuses ProviderLawStatusEntity[]
+}
+
+model MiningCompany {
+  id           String   @id @default(uuid())
+  legalName    String
+  cuit         String   @unique
+  contactEmail String
+  createdAt    DateTime @default(now())
+}
+
+model Law {
+  id          String   @id @default(uuid())
+  code        String
+  name        String
+  description String
+  scope       LawScope
+  isActive    Boolean
+  createdAt   DateTime @default(now())
+
+  requirements Requirement[]
+  providers    ProviderLawStatusEntity[]
+}
+
+model Requirement {
+  id          String          @id @default(uuid())
+  lawId       String
+  name        String
+  description String
+  type        RequirementType
+  isMandatory Boolean
+
+  law       Law        @relation(fields: [lawId], references: [id])
+  documents Document[]
+}
+
+model Document {
+  id             String   @id @default(uuid())
+  providerId     String
+  requirementId  String
+  documentType   String
+  fileUrl        String
+  fileHash       String
+  issueDate      DateTime
+  expirationDate DateTime
+  createdAt      DateTime @default(now())
+
+  provider    Provider     @relation(fields: [providerId], references: [id])
+  requirement Requirement  @relation(fields: [requirementId], references: [id])
+  validations Validation[]
+}
+
+model Validation {
+  id               String           @id @default(uuid())
+  documentId       String
+  technicalResult  ValidationResult
+  logicalResult    ValidationResult
+  regulatoryResult ValidationResult
+  notes            String
+  validatedBy      ValidatorType
+  createdAt        DateTime         @default(now())
+
+  document Document @relation(fields: [documentId], references: [id])
+}
+
+model ProviderLawStatusEntity {
+  id             String            @id @default(uuid())
+  providerId     String
+  lawId          String
+  status         ProviderLawStatus
+  reviewDate     DateTime
+  expirationDate DateTime
+
+  provider Provider @relation(fields: [providerId], references: [id])
+  law      Law      @relation(fields: [lawId], references: [id])
+
+  @@unique([providerId, lawId])
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  entity    String
+  entityId  String
+  action    String
+  details   String
+  createdAt DateTime @default(now())
 }
