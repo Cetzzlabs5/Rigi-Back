@@ -39,16 +39,34 @@ enum ValidatorType {
   USER
 }
 
+enum UserRole {
+  ADMIN
+  PROVIDER
+  MINING_COMPANY
+}
+
+model User {
+  id              String          @id @default(uuid())
+  legalName       String
+  email           String          @unique
+  cuit            String          @unique
+  role            UserRole
+  password        String
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  providers       Provider[]
+  miningCompanies MiningCompany[]
+}
+
 model Provider {
   id            String                @id @default(uuid())
-  legalName     String
-  cuit          String                @unique
   mainActivity  String
-  contactEmail  String
   phone         String
   address       String
   province      String
   generalStatus ProviderGeneralStatus
+  userId        String
+  user          User                  @relation(fields: [userId], references: [id])
   createdAt     DateTime              @default(now())
   updatedAt     DateTime              @updatedAt
 
@@ -57,11 +75,9 @@ model Provider {
 }
 
 model MiningCompany {
-  id           String   @id @default(uuid())
-  legalName    String
-  cuit         String   @unique
-  contactEmail String
-  createdAt    DateTime @default(now())
+  id     String @id @default(uuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
 }
 
 model Law {
