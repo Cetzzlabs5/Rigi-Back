@@ -5,12 +5,12 @@ export async function checkUserEmail(email: string) {
         const user = await prisma.user.findUnique({ where: { email } });
 
         if (user) {
-            return true;
+            return user;
         }
 
-        return false;
+        return null;
     } catch (error) {
         console.log(error);
-        return false;
+        return null;
     }
 }
