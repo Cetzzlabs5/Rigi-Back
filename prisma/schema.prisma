@@ -45,6 +45,15 @@ enum UserRole {
   MINING_COMPANY
 }
 
+model Token {
+  id        String   @id @default(uuid())
+  token     String
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
 model User {
   id            String         @id @default(uuid())
   legalName     String
@@ -52,10 +61,12 @@ model User {
   cuit          String         @unique
   role          UserRole
   password      String
+  isActive      Boolean        @default(false)
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
   provider      Provider?
   miningCompany MiningCompany?
+  tokens        Token[]
 }
 
 model Provider {
