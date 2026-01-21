@@ -10,14 +10,14 @@ export default class AuthController {
             const user = await checkUserEmail(email);
 
             if (!user) {
-                return res.status(404).json({ message: "Usuario no encontrado" });
+                return res.status(404).json({ error: "Usuario no encontrado" });
             }
 
             // TODO: Validar si la cuenta fue activada
 
             // TODO: Validar la contraseña
             if (password !== user.password) {
-                return res.status(401).json({ message: "Contraseña incorrecta" });
+                return res.status(401).json({ error: "Contraseña incorrecta" });
             }
 
             // Generar token

@@ -1,6 +1,6 @@
 import { Router } from 'express'
 import AuthController from '../controllers/AuthController.js';
-import { handleInputErrors } from '../moddleware/validation.js';
+import { handleInputErrors } from '../middleware/validation.js';
 import { body } from 'express-validator';
 
 const router = Router()
