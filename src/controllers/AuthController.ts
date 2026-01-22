@@ -24,45 +24,78 @@ export default class AuthController {
 
 export const register = async (req: Request, res: Response) => {
   try {
-    // 1. Validar entrada (Zod)
     const result = registerProviderSchema.safeParse(req.body);
     if (!result.success) return res.status(400).json({ errors: result.error.flatten().fieldErrors });
 
     const { cuit, email, password, legalName } = result.data;
 
-    // 2. Verificar duplicados
     const userExists = await prisma.user.findFirst({ where: { OR: [{ cuit }, { email }] } });
     if (userExists) return res.status(400).json({ message: "Usuario ya registrado con ese CUIT o Email" });
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // 3. Transacción: Crear todo o nada
     const resultData = await prisma.$transaction(async (tx) => {
-      // Crear Usuario
       const user = await tx.user.create({
         data: { legalName, email, cuit, password: hashedPassword, role: 'PROVIDER' }
       });
 
-      // Crear Perfil inicial de Proveedor (Criterio de Jira: completar perfil después)
       await tx.provider.create({
-        data: { userId: user.id, mainActivity: "", phone: "", address: "", province: "", generalStatus: 'ACTIVE' }
+        data: { id: user.id, phone: "", address: "", province: "", generalStatus: 'ACTIVE' }
       });
 
-      // 4. Generar Token usando la función de tu compañero
       const tokenRecord = await createResetToken(user.id, tx);
-
+      console.log("el token es",tokenRecord)
       return { user, token: tokenRecord.token };
     });
 
-    // 5. Enviar respuesta (Aquí llamarías a tu servicio de Email con resultData.token)
     res.status(201).json({
       message: "Usuario registrado. Revisa tu email para confirmar la cuenta.",
-      token: resultData.token // En producción esto no se envía en el JSON, solo por email
+      token: resultData.token // solo pa ver en postman 
     });
 
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Error en el servidor" });
   }
-};
+}
 
+export const confirmAccount = async (req: Request, res: Response) => {
+    try {
+        const { token, email } = req.body;
+
+        // 1. Buscar el token y el usuario asociado
+        const tokenExists = await prisma.token.findFirst({
+            where: { 
+                token,
+                user: { email } 
+            },
+            include: { user: true }
+        });
+
+        if (!tokenExists) {
+            return res.status(401).json({ message: "Código de verificación inválido" });
+        }
+
+        // 2. Verificar si expiró
+        if (new Date() > tokenExists.expiresAt) {
+            return res.status(401).json({ message: "El código ha expirado" });
+        }
+
+        // 3. Activar usuario y borrar el token (Transacción)
+        await prisma.$transaction([
+            prisma.user.update({
+                where: { id: tokenExists.userId },
+                data: { isActive: true }
+            }),
+            prisma.token.delete({
+                where: { id: tokenExists.id }
+            })
+        ]);
+
+        res.status(200).json({ message: "Cuenta activada correctamente" });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Error al confirmar cuenta" });
+    }
+}

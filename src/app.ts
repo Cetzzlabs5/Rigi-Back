@@ -12,4 +12,7 @@ app.get('/', (req, res) => {
     res.send('Respuesta desde el servidor')
 })
 
+app.use("/api/auth", authRoutes);
+app.use("/api/provider", providerRoutes);
+
 export default app;
