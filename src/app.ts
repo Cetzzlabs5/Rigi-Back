@@ -1,6 +1,7 @@
 import express, { type Application } from 'express'
 import { corsMiddleware } from "./config/cors.js";
 import providerRoutes from "./routes/providerRoutes.js";
+import providerActivityRoutes from "./routes/providerActivityRoutes.js";
 
 const app: Application = express()
 
@@ -12,5 +13,6 @@ app.get('/', (req, res) => {
 })
 
 app.use('/api/provider', providerRoutes)
+app.use('/api/providerActivity', providerActivityRoutes)
 
 export default app;
