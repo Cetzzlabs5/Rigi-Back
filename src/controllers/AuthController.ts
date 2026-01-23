@@ -162,6 +162,12 @@ export default class AuthController {
                 const error = new Error('Token no valido')
                 return res.status(404).json({ error: error.message })
             }
+
+            if (new Date() > tokenExists.expiresAt) {
+                return res.status(401).json({ message: "El código ha expirado" });
+            }
+
+
             res.send('Token valido, define tu nueva contraseña')
 
         } catch (error) {
