@@ -94,7 +94,7 @@ export class ProviderActivityController {
                 return res.status(404).json({ message: 'Proveedor no encontrado' });
             }
 
-            processDocument(newDocument.id, file.buffer, provider.user.cuit, provider.user.legalName).catch(err => console.error("Error en OCR background", err));
+            await processDocument(newDocument.id, file.buffer, provider.user.cuit, provider.user.legalName).catch(err => console.error("Error en OCR background", err));
 
             return res.status(201).json(newDocument);
 
