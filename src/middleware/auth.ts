@@ -9,6 +9,7 @@ interface IUser {
     email: string;
     role: string;
     isActive: boolean;
+    hasCompletedProfile?: boolean;
 }
 
 declare global {
@@ -32,12 +33,21 @@ export const authenticate = async (req: Request, res: Response, next: NextFuncti
 
         if (typeof decoded === 'object' && decoded.id) {
             const user = await prisma.user.findUnique({
-                where: { id: decoded.id }, select: {
+                where: { id: decoded.id },
+                select: {
                     id: true,
                     legalName: true,
                     email: true,
                     role: true,
-                    isActive: true
+                    isActive: true,
+                    provider: {
+                        select: {
+                            phone: true,
+                            address: true,
+                            province: true,
+                            providerActivityId: true
+                        }
+                    }
                 }
             })
 
@@ -48,7 +58,25 @@ export const authenticate = async (req: Request, res: Response, next: NextFuncti
             }
 
             if (user) {
-                req.user = user
+                const userResponse: IUser = {
+                    id: user.id,
+                    legalName: user.legalName,
+                    email: user.email,
+                    role: user.role,
+                    isActive: user.isActive
+                }
+
+                if (user.role === 'PROVIDER' && user.provider) {
+                    const hasCompletedProfile = !!(
+                        user.provider.phone &&
+                        user.provider.address &&
+                        user.provider.province &&
+                        user.provider.providerActivityId
+                    )
+                    userResponse.hasCompletedProfile = hasCompletedProfile
+                }
+
+                req.user = userResponse
                 next()
             } else {
                 res.status(500).json({ error: 'Token No Valido' })

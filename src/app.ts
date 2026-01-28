@@ -11,7 +11,7 @@ app.use(cookieParser());
 app.use(corsMiddleware());
 app.use(express.json());
 
-app.get('/', (req, res) => {
+app.get('/api', (req, res) => {
     res.send('Respuesta desde el servidor')
 })
 
