@@ -22,7 +22,7 @@ export class ProviderActivityController {
 
     static async uploadFile(req: Request, res: Response) {
         try {
-            const filePath = path.join(process.cwd(), 'assets', 'fileExample', 'mockup_afip_constancia_completa.pdf')
+            const filePath = path.join(process.cwd(), 'assets', 'fileExample', 'mockup_dgr_f900_completo.pdf')
             console.log(filePath)
             const file = await fs.readFileSync(filePath)
 
@@ -30,7 +30,8 @@ export class ProviderActivityController {
                 data: {
                     fileUrl: filePath,
                     documentType: 'F900',
-                    fileHash: 'hash',
+                    hash: 'hash1',
+                    originalName: 'mockup_dgr_f900_completo.pdf',
                     issueDate: new Date(),
                     expirationDate: new Date(),
                     status: 'PENDING',

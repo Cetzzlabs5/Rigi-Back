@@ -25,7 +25,7 @@ export const processDocument = async (docId: string, fileBuffer: Buffer, userCui
 
     // 3. Buscar CUIT
     const foundCuit = findCuitInText(text);
-    const foundName = findNameInText(text);
+    const foundName = await findNameInText(text);
 
     // 4. Comparar y Decidir
     if (foundCuit === userCuit && foundName === userName) {
@@ -39,7 +39,7 @@ export const processDocument = async (docId: string, fileBuffer: Buffer, userCui
             rejectionReason += `CUIT incorrecto. Se encontró ${foundCuit || 'ninguno'}, se esperaba ${userCuit}.`;
         }
         if (foundName !== userName) {
-            rejectionReason += `Nombre incorrecto. Se encontró ${foundName || 'ninguno'}, se esperaba ${userName}.`;
+            rejectionReason += `\n Nombre incorrecto. Se encontró ${foundName || 'ninguno'}, se esperaba ${userName}.`;
         }
         return await prisma.document.update({
             where: { id: docId },
