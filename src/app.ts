@@ -4,12 +4,17 @@ import providerRoutes from "./routes/providerRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 import providerActivityRoutes from "./routes/providerActivityRoutes.js";
 import cookieParser from 'cookie-parser';
+import fs from 'fs';
 
 const app: Application = express()
 
 app.use(cookieParser());
 app.use(corsMiddleware());
 app.use(express.json());
+
+if (!fs.existsSync('./uploads')){
+    fs.mkdirSync('./uploads');
+}
 
 app.get('/', (req, res) => {
     res.send('Respuesta desde el servidor')

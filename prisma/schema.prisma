@@ -28,6 +28,13 @@ enum ValidationResult {
   REJECTED
 }
 
+enum DocStatus {
+  PENDING
+  PROCESSING
+  VERIFIED
+  REJECTED
+}
+
 enum ProviderLawStatus {
   APPROVED
   REJECTED
@@ -127,15 +134,18 @@ model Requirement {
 }
 
 model Document {
-  id             String   @id @default(uuid())
-  providerId     String
-  requirementId  String
-  documentType   String
-  fileUrl        String
-  fileHash       String
-  issueDate      DateTime
-  expirationDate DateTime
-  createdAt      DateTime @default(now())
+  id              String    @id @default(uuid())
+  providerId      String
+  requirementId   String
+  originalName    String
+  documentType    String
+  fileUrl         String
+  hash            String    @unique
+  status          DocStatus @default(PENDING)
+  rejectionReason String?
+  issueDate       DateTime
+  expirationDate  DateTime
+  createdAt       DateTime  @default(now())
 
   provider    Provider     @relation(fields: [providerId], references: [id])
   requirement Requirement  @relation(fields: [requirementId], references: [id])
