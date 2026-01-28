@@ -9,4 +9,7 @@ generated/
 
 script.ts
 
+# Assets
+assets/
+
 uploads/
