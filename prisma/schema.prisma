@@ -137,6 +137,8 @@ model Document {
   id              String    @id @default(uuid())
   providerId      String
   requirementId   String
+  mimeType        String
+  size            Int
   documentType    String
   originalName    String
   fileUrl         String
