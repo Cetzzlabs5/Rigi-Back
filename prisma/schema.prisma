@@ -138,6 +138,7 @@ model Document {
   providerId      String
   requirementId   String
   documentType    String
+  originalName    String
   fileUrl         String
   hash            String    @unique
   status          DocStatus @default(PENDING)
