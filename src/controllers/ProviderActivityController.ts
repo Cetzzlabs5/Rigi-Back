@@ -30,7 +30,7 @@ export class ProviderActivityController {
             }
 
             const file = req.file; // Aquí está el archivo real (buffer, nombre, etc.)
-            
+
             // GENERAR HASH (Para evitar duplicados)
             const hash = crypto.createHash('sha256').update(file.buffer).digest('hex');
 
@@ -40,8 +40,8 @@ export class ProviderActivityController {
             });
 
             if (existingDoc) {
-                return res.status(409).json({ 
-                    message: 'Este documento ya fue subido anteriormente (Duplicado).' 
+                return res.status(409).json({
+                    message: 'Este documento ya fue subido anteriormente (Duplicado).'
                 });
             }
 
@@ -49,12 +49,12 @@ export class ProviderActivityController {
             // Convertimos "Mi Archivo.pdf" a "uuid-Mi_Archivo.pdf"
             const sanitizedName = file.originalname.replace(/[^a-zA-Z0-9.-]/g, '_');
             const fileName = `${uuidv4()}-${sanitizedName}`;
-            
+
             // Definir carpeta de destino 
-            const uploadDir = path.join(process.cwd(), 'uploads'); 
+            const uploadDir = path.join(process.cwd(), 'uploads');
             // Crear directorio si no existe (opcional pero recomendado)
             await fs.mkdir(uploadDir, { recursive: true });
-            
+
             const uploadPath = path.join(uploadDir, fileName);
 
             // GUARDAR ARCHIVO EN DISCO
@@ -63,24 +63,24 @@ export class ProviderActivityController {
             // GUARDAR EN BASE DE DATOS 
             const newDocument = await prisma.document.create({
                 data: {
-                    originalName: file.originalname,  
-                    mimeType: file.mimetype,          
-                    size: file.size,                  
-                    fileUrl: uploadPath,              
-                    hash: hash,                       
-                    
+                    originalName: file.originalname,
+                    mimeType: file.mimetype,
+                    size: file.size,
+                    fileUrl: uploadPath,
+                    hash: hash,
+
                     status: 'PENDING',
                     issueDate: new Date(),
                     expirationDate: new Date(),
-                    documentType: req.body.documentType || 'OTROS', 
-                    
+                    documentType: req.body.documentType || 'OTROS',
+
                     // RELACIONES
                     provider: {
                         connect: { id: req.user.id }
                     },
                     requirement: req.body.requirementId ? {
                         connect: { id: req.body.requirementId }
-                    } : undefined 
+                    } : undefined
                 }
             });
 
