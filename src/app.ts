@@ -12,11 +12,15 @@ app.use(cookieParser());
 app.use(corsMiddleware());
 app.use(express.json());
 
-if (!fs.existsSync('./uploads')){
+if (!fs.existsSync('./uploads')) {
     fs.mkdirSync('./uploads');
 }
 
-app.get('/', (req, res) => {
+if (!fs.existsSync('./uploads')) {
+    fs.mkdirSync('./uploads');
+}
+
+app.get('/api', (req, res) => {
     res.send('Respuesta desde el servidor')
 })
 
