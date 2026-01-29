@@ -57,7 +57,6 @@ export class AIService {
         }
     }
 
-    // Puedes agregar más métodos aquí, por ejemplo para Streaming o JSON Mode
 }
 
 // Exportamos una instancia única (Singleton) para reusar la conexión
