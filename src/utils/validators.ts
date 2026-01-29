@@ -22,10 +22,9 @@ export const findNameInText = async (text: string): Promise<string | null> => {
     return null;
 };
 
-// Función auxiliar mejorada para limpiar basura del nombre extraído
 const sanitizeName = (rawName: string): string => {
     return rawName
-        .replace(/^["']|["']$/g, '') // NUEVO: Quita comillas al inicio o final (común en DGR)
-        .replace(/[:.-]+$/, '')       // Quita puntos o dos puntos al final
-        .trim()              // Estandariza a mayúsculas
+        .replace(/^["']|["']$/g, '')
+        .replace(/[:.-]+$/, '')
+        .trim()
 };

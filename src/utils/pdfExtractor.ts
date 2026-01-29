@@ -9,7 +9,6 @@ export const extractTextFromBuffer = async (buffer: Buffer): Promise<string> => 
         const data = await parser.getText();
         await parser.destroy()
 
-        console.log(data.text)
         return data.text;
     } catch (error) {
         console.error("Error al leer PDF:", error);

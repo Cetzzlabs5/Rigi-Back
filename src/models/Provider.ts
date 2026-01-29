@@ -26,6 +26,14 @@ export class ProviderModel {
                         name: true,
                     },
                 },
+                user: {
+                    select: {
+                        legalName: true,
+                        email: true,
+                        cuit: true,
+                        role: true,
+                    },
+                }
             },
         })
 

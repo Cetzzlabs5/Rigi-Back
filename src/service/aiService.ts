@@ -13,7 +13,7 @@ interface AIGenerationOptions {
 
 export class AIService {
     private openai: OpenAI;
-    private defaultModel: string = "meta-llama/llama-3.3-70b-instruct:free";
+    private defaultModel: string = "tngtech/deepseek-r1t2-chimera:free";
 
     constructor() {
         // Configuración específica para OpenRouter
@@ -21,7 +21,7 @@ export class AIService {
             baseURL: "https://openrouter.ai/api/v1",
             apiKey: process.env.OPENROUTER_API_KEY,
             defaultHeaders: {
-                "HTTP-Referer": process.env.APP_URL || "http://localhost:3000", // Para rankings de OpenRouter
+                "HTTP-Referer": process.env.APP_URL || "http://localhost:3000",
                 "X-Title": process.env.APP_NAME || "My App",
             },
         });
