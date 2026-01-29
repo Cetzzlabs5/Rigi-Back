@@ -115,10 +115,10 @@ export default class AuthController {
 
             res.cookie('access_token', token, {
                 httpOnly: true,
-                secure: process.env.NODE_ENV == 'production', // la cookie solo se puede acceder en https
-                sameSite: 'strict',
-                maxAge: 10 * 60 * 1000
-            }).send('Sesion iniciada correctamente')
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+                maxAge: 10 * 60 * 1000,
+            }).send('Sesion iniciada correctamente');
         } catch (error) {
             console.log(error);
             return res.status(500).json({ message: "Internal server error" });
