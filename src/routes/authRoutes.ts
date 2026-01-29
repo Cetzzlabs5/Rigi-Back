@@ -36,11 +36,11 @@ router.get('/logout', authenticate, AuthController.logout)
 
 router.get('/session', authenticate, AuthController.session)
 
-// Ruta de registro (la que acabamos de crear)
+// Ruta de registro 
 router.post("/register", AuthController.register);
 router.post("/confirm-account", AuthController.confirmAccount);
 
-// Ruta de login (el método estático de tu clase)
+// Ruta de login 
 router.post("/login", AuthController.login);
 
 export default router as Router;

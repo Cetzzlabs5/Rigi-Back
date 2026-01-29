@@ -29,7 +29,7 @@ export class ProviderActivityController {
                 return res.status(400).json({ message: 'No se subió ningún archivo' });
             }
 
-            const file = req.file; // Aquí está el archivo real (buffer, nombre, etc.)
+            const file = req.file; // Aquí está el archivo (buffer, nombre, etc.)
 
             // GENERAR HASH (Para evitar duplicados)
             const hash = crypto.createHash('sha256').update(file.buffer).digest('hex');
@@ -52,7 +52,7 @@ export class ProviderActivityController {
 
             // Definir carpeta de destino 
             const uploadDir = path.join(process.cwd(), 'uploads');
-            // Crear directorio si no existe (opcional pero recomendado)
+            // Crear directorio si no existe 
             await fs.mkdir(uploadDir, { recursive: true });
 
             const uploadPath = path.join(uploadDir, fileName);
