@@ -16,10 +16,6 @@ if (!fs.existsSync('./uploads')) {
     fs.mkdirSync('./uploads');
 }
 
-if (!fs.existsSync('./uploads')) {
-    fs.mkdirSync('./uploads');
-}
-
 app.get('/api', (req, res) => {
     res.send('Respuesta desde el servidor')
 })
