@@ -35,4 +35,27 @@ export class AuthEmail {
             throw error
         }
     }
+
+    static sendConfirmationEmail = async (user: IEmail) => {
+        try {
+            const info = await transporter.sendMail({
+                from: process.env.EMAIL_USER,
+                to: user.email,
+                subject: 'RIGI - Confirma tu cuenta',
+                text: 'RIGI - Confirma tu cuenta',
+                html: `
+                <p>Hola ${user.name}, has creado tu cuenta en RIGI, ya casi esta todo listo.</p>
+                <p>Solo debes confirmar tu cuenta ingresando el siguiente codigo:</p>
+                <p>CODIGO: <b>${user.token}</b></p>
+                <p>Este codigo expira en 15 minutos</p>
+                `
+            })
+            console.log('Mensaje enviado: %s', info.messageId)
+        } catch (error) {
+            console.log(error)
+            // No lanzamos throw error aquí para no romper el registro si falla el email,
+            // pero es decisión tuya si quieres que falle todo el proceso :o
+            // throw error 
+        }
+    }
 }

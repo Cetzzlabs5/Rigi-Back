@@ -2,7 +2,6 @@ import { Request, Response } from "express";
 import { prisma } from '../config/prisma.js';
 import { registerProviderSchema } from "../schemas/authSchema.js";
 import { createResetToken } from '../utils/token.js';
-import bcrypt from 'bcrypt';
 import { checkUserEmail } from "../models/Auth.js";
 import { generateJWT } from "../utils/jwt.js";
 import { checkToken } from "../models/Token.js";
@@ -31,14 +30,20 @@ export default class AuthController {
                     data: { id: user.id, phone: "", address: "", province: "", generalStatus: 'ACTIVE' }
                 });
 
-                const tokenRecord = await createResetToken(user.id, tx);
-                console.log("el token es", tokenRecord)
+                const tokenRecord = await createResetToken(user.id, tx)
+                // Retornamos los datos necesarios para usar fuera de la transacció
                 return { user, token: tokenRecord.token };
             });
 
+            //ENVIAMOS EL EMAIL (Fuera de la transacción para no bloquear la BD)
+            await AuthEmail.sendConfirmationEmail({
+                email: resultData.user.email,
+                name: resultData.user.legalName,
+                token: resultData.token
+            });
+
             res.status(201).json({
-                message: "Usuario registrado. Revisa tu email para confirmar la cuenta.",
-                token: resultData.token // solo pa ver en postman 
+                message: "Usuario registrado. Revisa tu email para confirmar la cuenta."
             });
 
         } catch (error) {
