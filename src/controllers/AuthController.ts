@@ -208,7 +208,14 @@ export default class AuthController {
     }
 
     static logout = async (req: Request, res: Response) => {
-        res.clearCookie('access_token').send('Sesion cerrada correctamente')
+        res.clearCookie('access_token', {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+            path: '/'
+        });
+
+        return res.status(200).send('Sesión cerrada correctamente');
     }
 
     static session = async (req: Request, res: Response) => {
