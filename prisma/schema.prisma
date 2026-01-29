@@ -28,6 +28,13 @@ enum ValidationResult {
   REJECTED
 }
 
+enum DocStatus {
+  PENDING
+  PROCESSING
+  VERIFIED
+  REJECTED
+}
+
 enum ProviderLawStatus {
   APPROVED
   REJECTED
@@ -39,29 +46,66 @@ enum ValidatorType {
   USER
 }
 
-model Provider {
-  id            String                @id @default(uuid())
+enum UserRole {
+  ADMIN
+  PROVIDER
+  MINING_COMPANY
+}
+
+model Token {
+  id        String   @id @default(uuid())
+  token     String
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
+model User {
+  id            String         @id @default(uuid())
   legalName     String
-  cuit          String                @unique
-  mainActivity  String
-  contactEmail  String
+  email         String         @unique
+  cuit          String         @unique
+  role          UserRole
+  password      String
+  isActive      Boolean        @default(false)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  provider      Provider?
+  miningCompany MiningCompany?
+  tokens        Token[]
+}
+
+model Provider {
+  id   String @id
+  user User   @relation(fields: [id], references: [id])
+
+  providerActivity   ProviderActivity? @relation(fields: [providerActivityId], references: [id])
+  providerActivityId String?
+
   phone         String
   address       String
   province      String
   generalStatus ProviderGeneralStatus
-  createdAt     DateTime              @default(now())
-  updatedAt     DateTime              @updatedAt
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   documents   Document[]
   lawStatuses ProviderLawStatusEntity[]
 }
 
+model ProviderActivity {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+
+  providers Provider[]
+}
+
 model MiningCompany {
-  id           String   @id @default(uuid())
-  legalName    String
-  cuit         String   @unique
-  contactEmail String
-  createdAt    DateTime @default(now())
+  id   String @id
+  user User   @relation(fields: [id], references: [id])
 }
 
 model Law {
@@ -90,15 +134,20 @@ model Requirement {
 }
 
 model Document {
-  id             String   @id @default(uuid())
-  providerId     String
-  requirementId  String
-  documentType   String
-  fileUrl        String
-  fileHash       String
-  issueDate      DateTime
-  expirationDate DateTime
-  createdAt      DateTime @default(now())
+  id              String    @id @default(uuid())
+  providerId      String
+  requirementId   String
+  mimeType        String
+  size            Int
+  documentType    String
+  originalName    String
+  fileUrl         String
+  hash            String    @unique
+  status          DocStatus @default(PENDING)
+  rejectionReason String?
+  issueDate       DateTime
+  expirationDate  DateTime
+  createdAt       DateTime  @default(now())
 
   provider    Provider     @relation(fields: [providerId], references: [id])
   requirement Requirement  @relation(fields: [requirementId], references: [id])

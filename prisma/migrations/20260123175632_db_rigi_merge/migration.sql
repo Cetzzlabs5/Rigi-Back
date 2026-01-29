@@ -1,16 +1,3 @@
-/*
-  Warnings:
-
-  - You are about to drop the `Documento` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `EstadoProveedorLey` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `Ley` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `LogAuditoria` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `Minera` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `Proveedor` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `RequisitoLegal` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `Validacion` table. If the table is not empty, all the data it contains will be lost.
-
-*/
 -- CreateEnum
 CREATE TYPE "ProviderGeneralStatus" AS ENUM ('ACTIVE', 'SUSPENDED');
 
@@ -29,73 +16,39 @@ CREATE TYPE "ProviderLawStatus" AS ENUM ('APPROVED', 'REJECTED', 'OBSERVED');
 -- CreateEnum
 CREATE TYPE "ValidatorType" AS ENUM ('SYSTEM', 'USER');
 
--- DropForeignKey
-ALTER TABLE "Documento" DROP CONSTRAINT "Documento_proveedorId_fkey";
+-- CreateEnum
+CREATE TYPE "UserRole" AS ENUM ('ADMIN', 'PROVIDER', 'MINING_COMPANY');
 
--- DropForeignKey
-ALTER TABLE "Documento" DROP CONSTRAINT "Documento_requisitoLegalId_fkey";
+-- CreateTable
+CREATE TABLE "Token" (
+    "id" TEXT NOT NULL,
+    "token" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "expiresAt" TIMESTAMP(3) NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
--- DropForeignKey
-ALTER TABLE "EstadoProveedorLey" DROP CONSTRAINT "EstadoProveedorLey_leyId_fkey";
+    CONSTRAINT "Token_pkey" PRIMARY KEY ("id")
+);
 
--- DropForeignKey
-ALTER TABLE "EstadoProveedorLey" DROP CONSTRAINT "EstadoProveedorLey_proveedorId_fkey";
+-- CreateTable
+CREATE TABLE "User" (
+    "id" TEXT NOT NULL,
+    "legalName" TEXT NOT NULL,
+    "email" TEXT NOT NULL,
+    "cuit" TEXT NOT NULL,
+    "role" "UserRole" NOT NULL,
+    "password" TEXT NOT NULL,
+    "isActive" BOOLEAN NOT NULL DEFAULT false,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
 
--- DropForeignKey
-ALTER TABLE "RequisitoLegal" DROP CONSTRAINT "RequisitoLegal_leyId_fkey";
-
--- DropForeignKey
-ALTER TABLE "Validacion" DROP CONSTRAINT "Validacion_documentoId_fkey";
-
--- DropTable
-DROP TABLE "Documento";
-
--- DropTable
-DROP TABLE "EstadoProveedorLey";
-
--- DropTable
-DROP TABLE "Ley";
-
--- DropTable
-DROP TABLE "LogAuditoria";
-
--- DropTable
-DROP TABLE "Minera";
-
--- DropTable
-DROP TABLE "Proveedor";
-
--- DropTable
-DROP TABLE "RequisitoLegal";
-
--- DropTable
-DROP TABLE "Validacion";
-
--- DropEnum
-DROP TYPE "AmbitoLey";
-
--- DropEnum
-DROP TYPE "EstadoGeneralProveedor";
-
--- DropEnum
-DROP TYPE "EstadoLeyProveedor";
-
--- DropEnum
-DROP TYPE "ResultadoValidacion";
-
--- DropEnum
-DROP TYPE "TipoRequisito";
-
--- DropEnum
-DROP TYPE "Validador";
+    CONSTRAINT "User_pkey" PRIMARY KEY ("id")
+);
 
 -- CreateTable
 CREATE TABLE "Provider" (
     "id" TEXT NOT NULL,
-    "legalName" TEXT NOT NULL,
-    "cuit" TEXT NOT NULL,
-    "mainActivity" TEXT NOT NULL,
-    "contactEmail" TEXT NOT NULL,
+    "providerActivityId" TEXT,
     "phone" TEXT NOT NULL,
     "address" TEXT NOT NULL,
     "province" TEXT NOT NULL,
@@ -107,12 +60,17 @@ CREATE TABLE "Provider" (
 );
 
 -- CreateTable
+CREATE TABLE "ProviderActivity" (
+    "id" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "ProviderActivity_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "MiningCompany" (
     "id" TEXT NOT NULL,
-    "legalName" TEXT NOT NULL,
-    "cuit" TEXT NOT NULL,
-    "contactEmail" TEXT NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "MiningCompany_pkey" PRIMARY KEY ("id")
 );
@@ -196,13 +154,28 @@ CREATE TABLE "AuditLog" (
 );
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Provider_cuit_key" ON "Provider"("cuit");
+CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "MiningCompany_cuit_key" ON "MiningCompany"("cuit");
+CREATE UNIQUE INDEX "User_cuit_key" ON "User"("cuit");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "ProviderActivity_name_key" ON "ProviderActivity"("name");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "ProviderLawStatusEntity_providerId_lawId_key" ON "ProviderLawStatusEntity"("providerId", "lawId");
+
+-- AddForeignKey
+ALTER TABLE "Token" ADD CONSTRAINT "Token_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Provider" ADD CONSTRAINT "Provider_id_fkey" FOREIGN KEY ("id") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Provider" ADD CONSTRAINT "Provider_providerActivityId_fkey" FOREIGN KEY ("providerActivityId") REFERENCES "ProviderActivity"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "MiningCompany" ADD CONSTRAINT "MiningCompany_id_fkey" FOREIGN KEY ("id") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Requirement" ADD CONSTRAINT "Requirement_lawId_fkey" FOREIGN KEY ("lawId") REFERENCES "Law"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
